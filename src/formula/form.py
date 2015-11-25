@@ -38,20 +38,20 @@ class Parser:
         #print self.debugfile, self.tabmodule
 
         # Build the lexer and parser
-        lex.lex(module=self, debug=self.debug)
-    #    yacc.yacc(module=self,
-    #              debug=self.debug,
-    #              debugfile=self.debugfile,
-    #              tabmodule=self.tabmodule)
+        lex.lex(module=self, debug=1)
+        yacc.yacc(module=self,
+                  debug=1,
+                  debugfile=self.debugfile,
+                  tabmodule=self.tabmodule)
 
-    #def run(self):
-    #    while 1:
-    #        try:
-    #            s = raw_input('form > ')
-    #        except EOFError:
-    #            break
-    #        if not s: continue
-    #        yacc.parse(s)
+    def run(self):
+        while 1:
+            try:
+                s = raw_input('form > ')
+            except EOFError:
+                break
+            if not s: continue
+            yacc.parse(s)
 
     
 class Form(Parser):
@@ -96,28 +96,33 @@ class Form(Parser):
         """
         expr_E : expr_T expr_A
         """
+        p[0] = ('e', p[1], p[2])
 
     def p_expr_A(self,p):
         """
         expr_A : DIVIDE expr_T expr_A
             | empty
         """  
-    
+        if p[1] == '/': p[0] = ('a', p[1], p[2], p[3])
+
     def p_expr_T(self,p):
         """
         expr_T : expr_F expr_B
         """    
+        p[0] = ('t', p[1], p[2])
 
     def p_expr_B(self,p):
         """
         expr_B : expr_F expr_B
             | empty
         """    
+        if len(p) > 2: p[0] = ('b', p[1], p[2])
 
     def p_expr_F(self,p):
         """
         expr_F : expr_I expr_G
         """    
+        p[0] = ('f', p[1], p[2])
 
     def p_expr_G(self,p):
         """
@@ -125,18 +130,22 @@ class Form(Parser):
             | UNDERSCORE expr_I expr_L
             | empty
         """    
+        if p[1] == '^': p[0] = ('gPow', p[1], p[2], p[3])
+        elif p[1] == '_': p[0] = ('gUnderscore', p[1], p[2], p[3])
 
     def p_expr_H(self,p):
         """
         expr_H : UNDERSCORE expr_I
             | empty
         """    
+        if p[1] == '_': p[0] = ('h', p[1], p[2])
 
     def p_expr_L(self,p):
         """
         expr_L : POW expr_I
             | empty
         """    
+        if p[1] == '^': p[0] = ('l', p[1], p[2])
 
     def p_expr_I(self,p):
         """
@@ -144,12 +153,17 @@ class Form(Parser):
             | LBRACK expr_E RBRACK
             | CHAR
         """
+        if p[1] == '(': 
+            p[0] = ('hLParen', p[1], p[2], p[3])
+            print p[0]
+        elif p[1] == '{': p[0] = ('hLBrack', p[1], p[2], p[3])
+        else: p[0] = ('hl', p[1])
 
-    def p_empty(p):
+    def p_empty(self,p):
         'empty :'
         pass
 
-    def p_error(self, p):
+    def p_error(self,p):
         if p:
             print("Syntax error at '%s'" % p.value)
         else:
@@ -157,6 +171,6 @@ class Form(Parser):
 
 if __name__ == '__main__':
     form = Form()
-    #form.run()
+    form.run()
 
   
