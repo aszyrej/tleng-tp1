@@ -84,22 +84,70 @@ class Form(Parser):
 
     # Parsing rules
 
-    precedence = (
-        ('left','PLUS','MINUS'),
-        ('left','TIMES','DIVIDE'),
-        ('left', 'EXP'),
-        ('right','UMINUS'),
-        )
+#    precedence = (
+#        ('left','PLUS','MINUS'),
+#        ('left','TIMES','DIVIDE'),
+#        ('left', 'EXP'),
+#        ('right','UMINUS'),
+#        )
 
 
     def p_expr_E(self,p):
-      """
-      expr_E : expr_T expr_A
-      """
+        """
+        expr_E : expr_T expr_A
+        """
 
-    #def p_expr_A(self,p):
-
+    def p_expr_A(self,p):
+        """
+        expr_A : DIVIDE expr_T expr_A
+            | empty
+        """  
     
+    def p_expr_T(self,p):
+        """
+        expr_T : expr_F expr_B
+        """    
+
+    def p_expr_B(self,p):
+        """
+        expr_B : expr_F expr_B
+            | empty
+        """    
+
+    def p_expr_F(self,p):
+        """
+        expr_F : expr_I expr_G
+        """    
+
+    def p_expr_G(self,p):
+        """
+        expr_G : POW expr_I expr_H
+            | UNDERSCORE expr_I expr_L
+            | empty
+        """    
+
+    def p_expr_H(self,p):
+        """
+        expr_H : UNDERSCORE expr_I
+            | empty
+        """    
+
+    def p_expr_L(self,p):
+        """
+        expr_L : POW expr_I
+            | empty
+        """    
+
+    def p_expr_I(self,p):
+        """
+        expr_I : LPAREN expr_E RPAREN
+            | LBRACK expr_E RBRACK
+            | CHAR
+        """
+
+    def p_empty(p):
+        'empty :'
+        pass
 
     def p_error(self, p):
         if p:
