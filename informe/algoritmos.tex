@@ -1,0 +1,73 @@
+\begin{section}{Discusi\'on}
+
+\begin{algorithm}
+\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+
+\Input{Vector resultado X}
+\Output{Retorna el tiempo de impacto y la velocidad en ese momento}
+\BlankLine
+temperatura $\leftarrow$ x$[$(alto discreto$/$2)*ancho discreto+(ancho discreto$/$2)$]$\;
+\Return{temperatura}\;
+
+\caption{Algoritmo de temperatura punto critico}
+\end{algorithm}
+
+\begin{algorithm}
+\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+
+\Input{Posicion de una sanguijuela (x,y)}
+\Output{Retorna la norma dos cuadrada}
+\BlankLine
+distancia $\leftarrow$ $(x-alto_discreto/2)^{2}$+$(y-ancho_discreto/2)^{2}$\;
+\Return{distancia}\;
+
+\caption{Algoritmo de distancia}
+\end{algorithm}
+
+\begin{algorithm}
+\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+
+\Input{nada}
+\Output{nada}
+\BlankLine
+it cercana $\leftarrow$ sanguijuelas.begin()\;
+\While{( haya sanguijuelas)}{ 
+        \If{(distancia(*it) $<$ distancia(*cercana))}{
+                cercana = it\;
+}
+cantidad sanguijuelas--\;
+sanguijuelas.erase(cercana)\;
+\Return{}\;
+
+\caption{Algoritmo de eliminar sanguijuela}
+\end{algorithm}
+
+\begin{algorithm}
+\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+
+\Input{nada}
+\Output{nada}
+\BlankLine
+it cercana $\leftarrow$ sanguijuelas.begin()\;
+\While{(temperatura punto critico(x) $>$ 235)}{ 
+        \If{(cantidad sanguijuelas $==$ 0)}{
+		\emph{Se sacaron todas las sanguijuelas del parabrisas.}\;
+                break\;
+}
+eliminar sanguijuela()\;
+parabrisas sin sanguijuelas()\;
+colocar sanguijuelas()\;
+%\Return{}\;
+
+\caption{Ciclo de eliminacion de sanguijuelas}
+\end{algorithm}
+
+\end{section}

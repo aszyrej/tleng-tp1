@@ -1,0 +1,67 @@
+\documentclass[11pt, a4paper,spanish]{article}
+\usepackage[spanish,activeacute]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{caratula}
+%\usepackage[ruled,vlined,boxed,commentsnumbered,linesnumbered]{algorithm2e}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{lastpage}
+\usepackage{ulem}
+\usepackage{listings}
+
+\usepackage[ruled,vlined,boxed,commentsnumbered]{algorithm2e}
+
+% Encabezado y Pie de pagina
+\pagestyle{fancy}
+\fancyhf{}
+%\lfoot{\rightmark}
+\lfoot{Teor\'ia de Lenguajes}
+\rhead{Trabajo Pr\'actico - Compositor de f\'ormulas matem\'aticas}
+\rfoot{\thepage\ de \pageref{LastPage}}
+
+
+\begin{document}
+% ------------ CARATULA ------------
+    \input{caratula}
+
+% ------------ INDICE ------------
+
+    \thispagestyle{empty}
+    \tableofcontents
+    \pagebreak
+
+% ------------ INTRODUCCION ------------
+
+	\input{./introduccion.tex}
+
+% ------------ DESARROLLO ------------
+
+	\input{./desarrollo.tex}
+	\pagebreak
+
+% ------------ RESULTADOS ------------
+
+	%\input{./resultados.tex}
+	
+% ------------ DISCUSION ------------
+
+	%\input{./consultas.tex}
+	%\pagebreak
+
+% ------------ CONCLUSIONES ------------
+
+	\input{./conclusiones.tex}
+	\pagebreak
+
+% ------------ REFERENCIAS ------------
+
+	\input{referencias}
+
+	\pagebreak
+
+\end{document}
