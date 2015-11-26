@@ -12,6 +12,8 @@
 import sys
 sys.path.insert(0,"../..")
 sys.path.insert(0,"../svg")
+sys.path.insert(0,"../tree")
+
 
 if sys.version_info[0] >= 3:
     raw_input = input
@@ -19,8 +21,9 @@ if sys.version_info[0] >= 3:
 import ply.lex as lex
 import ply.yacc as yacc
 import os
-import svg
-from ete2 import Tree
+from svg import SVGBuilder
+from tree import Tree
+from tree import Node
 
 class Parser:
     """
@@ -54,70 +57,125 @@ class Parser:
             except EOFError:
                 break
             if not s: continue
-            ast = Tree(str(yacc.parse(s))+";")
-            self.process(ast)
-            
+            ast = Tree(yacc.parse(s))
+            print self.process(ast)
+            svgB = SVGBuilder()
+            svg = svgB.build(ast)
+            svg.save('test.svg')
+
     def process(self, ast):
-        for node in ast.traverse("preorder"):
-            if (node.is_root()):
-                node.add_features(x=0, y=0, z=1)
+        ast.root.z = 1
+        ns = ast.preorder_traversal()
+        index = 0
+        for node in ns:
+            if node.type == 'concat':
+                try:
+                    ns[index+1].copy_node_attrs(node)
+                except:
+                    pass
+            elif node.type == 'divide':
+                try:
+                    ns[index+1].copy_node_attrs(node)
+                    ns[index+1].y -= 0.19
+                    node.children[-1].y1 = node.y - 0.28*node.y
+                    node.children[-1].y2 = node.y - 0.28*node.y
+                except:
+                    pass
+            elif node.type == 'p':
+                try:
+                    ns[index+1].copy_node_attrs(node)
+                except:
+                    pass
+            elif node.type == 'u':
+                try:
+                    ns[index+1].copy_node_attrs(node)
+                except:
+                    pass
+            elif node.type == 'pu':
+                try:
+                    ns[index+1].copy_node_attrs(node)
+                except:
+                    pass
+            elif node.type == 'parens':
+                pass
+            elif node.type == 'brackets':
+                pass
             else:
-                if len(node.name)==0:
+                if node.parent.type == 'concat':
                     try:
-                        copy = node.get_sisters()[0]
-                        node.add_features(x=copy.x, y=copy.y, z=copy.z)
+                        ns[index+1].x = node.x+0.6*node.z
+                        ns[index+1].y = node.y
+                        ns[index+1].z = node.z
                     except:
-                        print "bla3"
-                elif node.name == '\'concat\'' or node.name == '\'divide\'' or node.name == '\'p\'' or node.name == '\'pu\'' or node.name == '\'u\'':
-                    up = node.up
+                        pass
+                elif node.parent.type == 'p':
                     try:
-                        node.add_features(x=up.x, y=up.y, z=up.z)
+                        if (node.leftSibling == None):
+                            ns[index+1].x = node.x+0.6*node.z
+                            ns[index+1].y = node.y-0.45
+                            ns[index+1].z = 0.7*node.z
+                        else:
+                            ns[index+1].copy_node_attrs(node.parent)
+                            ns[index+1].x = node.x+0.6*node.z
                     except:
-                        print "bla"
-                # CONCAT
-                elif node.get_sisters()[0].name == '\'concat\'':
-                    concatNode = node.get_sisters()[0]
+                        pass
+                elif node.parent.type == 'u':
                     try:
-                        x = concatNode.x+concatNode.z*0.6
-                        y = concatNode.y
-                        z = concatNode.z
-                        node.add_features(x=x, y=y, z=z)
-                        concatNode.add_features(x=x, y=y, z=z)
+                        if (node.leftSibling == None):
+                            ns[index+1].x = node.x+0.6*node.z
+                            ns[index+1].y = node.y+0.25
+                            ns[index+1].z = 0.7*node.z
+                        else:
+                            ns[index+1].copy_node_attrs(node.parent)
+                            ns[index+1].x = node.x+0.6*node.z
                     except:
-                        print "bla2"
-                # SUPERINDICE
-                elif node.get_sisters()[0].name == '\'p\'':
-                    pNode = node.get_sisters()[0]
-                    if pNode.z != 0.7:
-                        x = pNode.x+0.6
-                        node.add_features(x=x, y=pNode.y, z=pNode.z)
-                        pNode.add_features(x=x, z=0.7)
-                    else:
-                        x = pNode.x+0.6
-                        y = pNode.y - 0.45
-                        z = 0.7
-                        node.add_features(x=x, y=y, z=z)
-                        pNode.add_features(x=x, z=z)
-                        pNode.up.get_sisters()[0].add_features(x=pNode.x, y=pNode.y, z=pNode.z)
-                #SUBINDICE
-                elif node.get_sisters()[0].name == '\'u\'':
-                    uNode = node.get_sisters()[0]
-                    if uNode.z != 0.7:
-                        x = uNode.x+0.6
-                        uNode.add_features(x=x, z=0.7)
-                        node.add_features(x=x, y=uNode.y, z=uNode.z)
-                    else:
-                        x = uNode.x+0.6
-                        y = uNode.y + 0.45
-                        z = 0.7
-                        node.add_features(x=x, y=y, z=z)
-                        uNode.add_features(x=x, z=z)
-                        uNode.up.get_sisters()[0].add_features(x=uNode.x, y=uNode.y, z=uNode.z)
-        print ast.get_ascii(attributes=["name", "x", "y", "z"])
+                        pass
+                elif node.parent.type == 'pu':
+                    try:
+                        if (node.leftSibling == None):
+                            ns[index+1].x = node.x+0.6*node.z
+                            ns[index+1].y = node.y-0.45
+                            ns[index+1].z = 0.7*node.z
+                            ns[index+2].x = node.x+0.6*node.z
+                            ns[index+2].y = node.y+0.25
+                            ns[index+2].z = 0.7*node.z
+                        elif (node.rightSibling == None):
+                            ns[index+1].copy_node_attrs(node.parent)
+                            ns[index+1].x = node.x+0.6*node.z
+                    except:
+                        pass
+                elif node.parent.type == 'divide':
+                    try:
+                        if (node.leftSibling == None):
+                            ns[index+1].x = node.x
+                            ns[index+1].z = node.z
+                            ns[index+1].y = node.y + 0.95
+                        elif (node.rightSibling != None):
+                            ns[index+1].x = node.x+0.6*node.z
+                            ns[index+1].z = node.z
+                        else:
+                            node.leftSibling.y = node.parent.y + 0.95
+                            long_a = node.leftSibling.x - node.parent.children[0].x
+                            long_b = node.x - node.leftSibling.x
+                            if (long_a >= long_b):
+                                # inicial A - final A
+                                node.x1 = node.parent.children[0].x
+                                node.x2 = node.leftSibling.x
+                                ns[index+1].x = node.x2
+                                # centrar B
+                                node.leftSibling.x = node.parent.children[0].x + ((long_a-long_b)/2.0)
+                            else:
+                                # inicial B - final B
+                                node.x1 = node.leftSibling.x
+                                node.x2 = node.x
+                                ns[index+1].x = node.x2
+                                # centrar A
+                                node.parent.children[0].x = node.leftSibling.x + ((long_b-long_a)/2.0)
+                    except Exception as e:
+                        print e
 
-        
-            
-
+            index += 1
+        return ns[0]
     
 class Form(Parser):
 
@@ -147,21 +205,12 @@ class Form(Parser):
         print("Illegal character '%s'" % t.value[0])
         t.lexer.skip(1)
 
-    # Parsing rules
-
-#    precedence = (
-#        ('left','PLUS','MINUS'),
-#        ('left','TIMES','DIVIDE'),
-#        ('left', 'EXP'),
-#        ('right','UMINUS'),
-#        )
-
-
     def p_expr_E(self,p):
         """
         expr_E : expr_T expr_A
         """
-        if p[2] != None: p[0] = ('divide', p[1], p[2])
+        if p[2] != None:
+            p[0] = Node('divide', [p[1], p[2], Node('barra')])
         else: p[0] = p[1]
 
     def p_expr_A(self,p):
@@ -171,13 +220,15 @@ class Form(Parser):
         """  
         if p[1] == None: p[0] = None
         elif p[3] == None: p[0] = p[2]
-        else: p[0] = ('divide', p[2], p[3])
+        else: 
+            p[0] = Node('divide', [p[2], p[3], Node('barra')])
 
     def p_expr_T(self,p):
         """
         expr_T : expr_F expr_B
         """    
-        if p[2] != None: p[0] = ('concat', p[1], p[2])
+        if p[2] != None:
+            p[0] = Node('concat', [p[1], p[2]])
         else: p[0] = p[1]
 
     def p_expr_B(self,p):
@@ -187,7 +238,8 @@ class Form(Parser):
         """    
         if p[1] == None: p[0] = None
         elif p[2] == None: p[0] = p[1]
-        else: p[0] = ('concat', p[1], p[2])
+        else:
+            p[0] = Node('concat', [p[1], p[2]])
 
     def p_expr_F(self,p):
         """
@@ -195,11 +247,11 @@ class Form(Parser):
         """    
         if p[2] != None:
             if p[2][0] == 'pu':
-                p[0] = ('pu', p[1], p[2][1], p[2][2])
+                p[0] = Node('pu', [p[1], p[2][1], p[2][2]])
             elif p[2][0] == 'p':
-                p[0] = ('p', p[1], p[2][1])
+                p[0] = Node('p', [p[1], p[2][1]])
             else:
-                p[0] = ('u', p[1], p[2][1])
+                p[0] = Node('u', [p[1], p[2][1]])
         else:
             p[0] = p[1]
 
@@ -245,11 +297,11 @@ class Form(Parser):
             | CHAR
         """
         if p[1] == '(': 
-            p[0] = ('<', p[2], '>')
-        elif p[1] == '{': p[0] = ('{', p[2], '}')
-        else: p[0] = p[1]
+            p[0] = Node('parens', [Node('('), p[2], Node(')')])
+        elif p[1] == '{':
+            p[0] = Node('brackets', [Node('{'), p[2], Node('}')])
+        else: p[0] = Node(p[1])
     
-
     def p_empty(self,p):
         'empty :'
         pass
