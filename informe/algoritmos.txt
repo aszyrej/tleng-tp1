@@ -1,0 +1,39 @@
+
+-----------------
+temperatura_punto_critico(x){
+	temperatura = x[(alto_discreto/2)*ancho_discreto+(ancho_discreto/2)];
+	return temperatura;
+}
+
+---------------
+Sacamos la distancia de cada sanguijuela con la norma dos cuadrada.
+
+toma: una sanguijuela (x,y)
+devuelve: la distancia al punto critico de la sanguijuela tomado por parametro
+distancia (pos_sang){
+	distancia = (x-alto_discreto/2)^2+(y-ancho_discreto/2)^2;
+	return distancia;
+}
+
+----------------
+eliminar_sanguijuela(){
+	iterator cercana = sanguijuelas.begin();
+	mientras (haya sanguijuelas){
+		Si (distancia(*it) < distancia(*cercana)) cercana = it;
+	}
+	cantidad_sanguijuelas--;
+	sanguijuelas.erase(cercana);
+}
+
+-----------------
+// Eliminacion de sanguijuelas
+mientras (temperatura_punto_critico(x) > 235){
+	si (cantidad_sanguijuelas == 0){
+		cout << "Se sacaron todas las sanguijuelas del parabrisas.\n";
+		break;
+	}
+	eliminar_sanguijuela();
+	parabrisas_sin_sanguijuelas();
+	colocar_sanguijuelas();
+}
+

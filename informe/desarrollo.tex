@@ -1,0 +1,72 @@
+\begin{section}{Parte I: Tokenizacion y Parseo}
+
+\begin{subsection}{Desambiguando la gram\'atica}
+Utilizamos los m\'odulos de Lex y Yacc para esta primera parte de tokenizaci\'on y parsing. Puesto que el parser usado por el m\'odulo Yacc utiliza la t\'ecnica LALR, nos enfocamos en un primer momento en desambiguar la gram\'atica para que al momento de construir la tabla de $Action$ LALR no haya conflictos.
+
+Gram\'atica inicial G:
+\newline E $\rightarrow$ E E 
+\newline $|$ E \^{} E
+\newline $|$ E \_ E
+\newline $|$ E \^{} E \_ E
+\newline $|$ E \_ E \^{} E
+\newline $|$ E / E
+\newline $|$ ( E )
+\newline $|$ \{ E \}
+\newline $|$ c
+  
+~
+
+Primeramente consideramos el orden de presedencia dispuesto en el enunciado. Luego la gram\'atica G1 se rige sobre la siguiente tabla: 
+  
+~
+
+\begin{tabular}{ c | c | c }
+  			
+  Caracter & Presedencia & Asociatividad \\
+  \hline
+  / & 1 & Izq \\
+  . & 2 & Izq \\
+  \^{} & 3 & - \\
+  \_ & 3 & - \\
+  () & 4 & - \\
+  \{\} & 4 & - \\
+  
+\end{tabular}
+  
+~
+
+Luego G1 qued\'o determinada por el siguiente conjunto de producciones:
+\newline \underline{E $\rightarrow$ E / T $|$ T}
+\newline \underline{T $\rightarrow$ T F $|$ F}
+\textbf{\newline F $\rightarrow$ I \^{} G $|$ G $|$ I \_ H $|$ H
+\newline H $\rightarrow$ I \^{} I $|$ I
+\newline G $\rightarrow$ I \_ I $|$ I}
+\newline I $\rightarrow$ (E) $|$ \{E\} $|$ c
+  
+~
+
+Notar que las producciones subrayadas son recursivas a izquierda, lo cual genera conflictos. 
+Las producciones en negrita generaron otros problemas. En estas se debe factorizar a izquiera para no tener conflictos.
+
+Finalmente la gram\'atica qued\'o de la pinta G2:
+\newline E $\rightarrow$ T A
+\newline A $\rightarrow$ / T A $|$ lambda
+\newline T $\rightarrow$ F B
+\newline B $\rightarrow$ F B $|$ lambda
+\newline F $\rightarrow$ I G
+\newline G $\rightarrow$ \^{} I H $|$ \_ I L $|$ lambda
+\newline H $\rightarrow$ \_ I $|$ lambda
+\newline L $\rightarrow$ \^{} I $|$ lambda
+\newline I $\rightarrow$ (E) $|$ \{E\} $|$ c
+  
+~
+
+donde la recursion a izquierda fue eliminada introduciendo las producciones de A y B, y los conflictos de F G y H fueron resueltos subiendo los casos de G y H hasta F y tomando factor com\'un a izquierda.
+
+\end{subsection}
+\end{section}
+
+\begin{section}{Parte II: Construcci\'on SVG}
+
+\end{section}
+
