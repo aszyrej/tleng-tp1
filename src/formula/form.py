@@ -11,6 +11,7 @@
 
 import sys
 sys.path.insert(0,"../..")
+sys.path.insert(0,"../svg")
 
 if sys.version_info[0] >= 3:
     raw_input = input
@@ -18,6 +19,8 @@ if sys.version_info[0] >= 3:
 import ply.lex as lex
 import ply.yacc as yacc
 import os
+import svg
+from ete2 import Tree
 
 class Parser:
     """
@@ -51,7 +54,69 @@ class Parser:
             except EOFError:
                 break
             if not s: continue
-            yacc.parse(s)
+            ast = Tree(str(yacc.parse(s))+";")
+            self.process(ast)
+            
+    def process(self, ast):
+        for node in ast.traverse("preorder"):
+            if (node.is_root()):
+                node.add_features(x=0, y=0, z=1)
+            else:
+                if len(node.name)==0:
+                    try:
+                        copy = node.get_sisters()[0]
+                        node.add_features(x=copy.x, y=copy.y, z=copy.z)
+                    except:
+                        print "bla3"
+                elif node.name == '\'concat\'' or node.name == '\'divide\'' or node.name == '\'p\'' or node.name == '\'pu\'' or node.name == '\'u\'':
+                    up = node.up
+                    try:
+                        node.add_features(x=up.x, y=up.y, z=up.z)
+                    except:
+                        print "bla"
+                # CONCAT
+                elif node.get_sisters()[0].name == '\'concat\'':
+                    concatNode = node.get_sisters()[0]
+                    try:
+                        x = concatNode.x+concatNode.z*0.6
+                        y = concatNode.y
+                        z = concatNode.z
+                        node.add_features(x=x, y=y, z=z)
+                        concatNode.add_features(x=x, y=y, z=z)
+                    except:
+                        print "bla2"
+                # SUPERINDICE
+                elif node.get_sisters()[0].name == '\'p\'':
+                    pNode = node.get_sisters()[0]
+                    if pNode.z != 0.7:
+                        x = pNode.x+0.6
+                        node.add_features(x=x, y=pNode.y, z=pNode.z)
+                        pNode.add_features(x=x, z=0.7)
+                    else:
+                        x = pNode.x+0.6
+                        y = pNode.y - 0.45
+                        z = 0.7
+                        node.add_features(x=x, y=y, z=z)
+                        pNode.add_features(x=x, z=z)
+                        pNode.up.get_sisters()[0].add_features(x=pNode.x, y=pNode.y, z=pNode.z)
+                #SUBINDICE
+                elif node.get_sisters()[0].name == '\'u\'':
+                    uNode = node.get_sisters()[0]
+                    if uNode.z != 0.7:
+                        x = uNode.x+0.6
+                        uNode.add_features(x=x, z=0.7)
+                        node.add_features(x=x, y=uNode.y, z=uNode.z)
+                    else:
+                        x = uNode.x+0.6
+                        y = uNode.y + 0.45
+                        z = 0.7
+                        node.add_features(x=x, y=y, z=z)
+                        uNode.add_features(x=x, z=z)
+                        uNode.up.get_sisters()[0].add_features(x=uNode.x, y=uNode.y, z=uNode.z)
+        print ast.get_ascii(attributes=["name", "x", "y", "z"])
+
+        
+            
 
     
 class Form(Parser):
@@ -70,7 +135,7 @@ class Form(Parser):
     t_RBRACK  = r'\}'
     t_LPAREN  = r'\('
     t_RPAREN  = r'\)'
-    t_CHAR  = r'[a-zA-Z+-@#%&$=]'
+    t_CHAR  = r'[a-zA-Z+-]'
 
     t_ignore = " \t"
 
@@ -96,33 +161,47 @@ class Form(Parser):
         """
         expr_E : expr_T expr_A
         """
-        p[0] = ('e', p[1], p[2])
+        if p[2] != None: p[0] = ('divide', p[1], p[2])
+        else: p[0] = p[1]
 
     def p_expr_A(self,p):
         """
         expr_A : DIVIDE expr_T expr_A
             | empty
         """  
-        if p[1] == '/': p[0] = ('a', p[1], p[2], p[3])
+        if p[1] == None: p[0] = None
+        elif p[3] == None: p[0] = p[2]
+        else: p[0] = ('divide', p[2], p[3])
 
     def p_expr_T(self,p):
         """
         expr_T : expr_F expr_B
         """    
-        p[0] = ('t', p[1], p[2])
+        if p[2] != None: p[0] = ('concat', p[1], p[2])
+        else: p[0] = p[1]
 
     def p_expr_B(self,p):
         """
         expr_B : expr_F expr_B
             | empty
         """    
-        if len(p) > 2: p[0] = ('b', p[1], p[2])
+        if p[1] == None: p[0] = None
+        elif p[2] == None: p[0] = p[1]
+        else: p[0] = ('concat', p[1], p[2])
 
     def p_expr_F(self,p):
         """
         expr_F : expr_I expr_G
         """    
-        p[0] = ('f', p[1], p[2])
+        if p[2] != None:
+            if p[2][0] == 'pu':
+                p[0] = ('pu', p[1], p[2][1], p[2][2])
+            elif p[2][0] == 'p':
+                p[0] = ('p', p[1], p[2][1])
+            else:
+                p[0] = ('u', p[1], p[2][1])
+        else:
+            p[0] = p[1]
 
     def p_expr_G(self,p):
         """
@@ -130,22 +209,34 @@ class Form(Parser):
             | UNDERSCORE expr_I expr_L
             | empty
         """    
-        if p[1] == '^': p[0] = ('gPow', p[1], p[2], p[3])
-        elif p[1] == '_': p[0] = ('gUnderscore', p[1], p[2], p[3])
-
+        if p[1] == None:
+            p[0] = None
+        elif p[1] == '^':
+            if p[3] == None:
+                p[0] = ('p', p[2])
+            else:
+                p[0] = ('pu', p[2], p[3])
+        elif p[1] == '_':
+            if p[3] == None:
+                p[0] = ('u', p[2])
+            else:
+                p[0] = ('pu', p[3], p[2])
+       
     def p_expr_H(self,p):
         """
         expr_H : UNDERSCORE expr_I
             | empty
         """    
-        if p[1] == '_': p[0] = ('h', p[1], p[2])
+        if p[1] != None: p[0] = p[2]
+        else: p[0] = None
 
     def p_expr_L(self,p):
         """
         expr_L : POW expr_I
             | empty
         """    
-        if p[1] == '^': p[0] = ('l', p[1], p[2])
+        if p[1] != None: p[0] = p[2]
+        else: p[0] = None
 
     def p_expr_I(self,p):
         """
@@ -154,10 +245,10 @@ class Form(Parser):
             | CHAR
         """
         if p[1] == '(': 
-            p[0] = ('hLParen', p[1], p[2], p[3])
-            print p[0]
-        elif p[1] == '{': p[0] = ('hLBrack', p[1], p[2], p[3])
-        else: p[0] = ('hl', p[1])
+            p[0] = ('<', p[2], '>')
+        elif p[1] == '{': p[0] = ('{', p[2], '}')
+        else: p[0] = p[1]
+    
 
     def p_empty(self,p):
         'empty :'
