@@ -131,19 +131,25 @@ class ASTProcessor:
 
                         # node.left_sibling.move(0,node.left_sibling.attrs['y'] - node.parent.attrs['y'] + 0.95)
 
+                        inicio_a = node.first_sibling().attrs['x']
+                        fin_a = node.left_sibling.attrs['x']
+
                         if node.left_sibling.type == 'p' or node.left_sibling.type == 'pu':
                             node.left_sibling.move(-long_a,1.05)
                         else:
                             node.left_sibling.move(-long_a,0.95)
-
-                        inicio_a = node.first_sibling().attrs['x']
-                        fin_a = node.left_sibling.attrs['x']
+                        
                         inicio_b = node.left_sibling.attrs['x']
                         fin_b = node.attrs['x']-long_a
+
+                        print inicio_a
+                        print fin_a
+                        print inicio_b
+                        print fin_b
         
                         node.attrs['x1'] = node.first_sibling().attrs['x']
-                        print long_a
-                        print long_b
+                        #print long_a
+                        #print long_b
                         # centrar B
                         if (long_a > long_b):
                             node.attrs['x2'] = fin_a

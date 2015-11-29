@@ -1,4 +1,3 @@
-from lxml import etree
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element, SubElement, tostring
 
@@ -64,9 +63,8 @@ class SVGBuilder:
                     svg.appendLine(str(node.attrs['x1']), str(node.attrs['y1']), str(node.attrs['x2']), str(node.attrs['y2']))
                 elif (node.type == '(' or node.type == ')'):
                     largo_paren = float(node.attrs['y2'])-float(node.attrs['y1'])+float(node.attrs['z'])
-                    y = largo_paren/2.0
-                    print largo_paren
-                    print y
+                    y = largo_paren-float(node.attrs['z'])
+                    
                     if node.type == '(':
                         svg.appendText('(', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y), str(node.attrs['z']), str(largo_paren))
                     else:
