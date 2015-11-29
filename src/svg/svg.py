@@ -61,9 +61,9 @@ class SVGBuilder:
                 pass
             else:
                 if(node.type == 'barra'):
-                    svg.appendLine(str(node.x1), str(node.y1), str(node.x2), str(node.y2))
-                else:
-                    svg.appendText(node.type, str(node.x), str(node.y), str(node.z))
+                    svg.appendLine(str(node.attrs['x1']), str(node.attrs['y1']), str(node.attrs['x2']), str(node.attrs['y2']))
+                elif(node.type != 'brackets' and node.type != '{' and node.type != '}'):
+                    svg.appendText(node.type, str(node.attrs['x']), str(node.attrs['y']), str(node.attrs['z']))
         return svg
 
 #ejCatedra

@@ -1,14 +1,5 @@
 #!/usr/bin/env python
 
-# -----------------------------------------------------------------------------
-# calc.py
-#
-# A simple calculator with variables.   This is from O'Reilly's
-# "Lex and Yacc", p. 63.
-#
-# Class-based example contributed to PLY by David McNab
-# -----------------------------------------------------------------------------
-
 import sys
 sys.path.insert(0,"../..")
 sys.path.insert(0,"../svg")
@@ -64,115 +55,137 @@ class Parser:
             svg.save('test.svg')
 
     def process(self, ast):
-        ast.root.z = 1
-        ns = ast.preorder_traversal()
+        ast.root.attrs['x'] = 0
+        ast.root.attrs['y'] = 0
+        ast.root.attrs['z'] = 1
+        ns = ast.preorder_traversal()       
         index = 0
         for node in ns:
-            if node.type == 'concat':
-                try:
-                    ns[index+1].copy_node_attrs(node)
-                except:
-                    pass
+            if node.type == 'concat' \
+            or node.type == 'p' \
+            or node.type == 'u' \
+            or node.type == 'pu':
+                node.first_child().copy_node_attrs(node)
             elif node.type == 'divide':
-                try:
-                    ns[index+1].copy_node_attrs(node)
-                    ns[index+1].y -= 0.19
-                    node.children[-1].y1 = node.y - 0.28*node.y
-                    node.children[-1].y2 = node.y - 0.28*node.y
-                except:
-                    pass
-            elif node.type == 'p':
-                try:
-                    ns[index+1].copy_node_attrs(node)
-                except:
-                    pass
-            elif node.type == 'u':
-                try:
-                    ns[index+1].copy_node_attrs(node)
-                except:
-                    pass
-            elif node.type == 'pu':
-                try:
-                    ns[index+1].copy_node_attrs(node)
-                except:
-                    pass
+                node.first_child().copy_node_attrs(node)
+                node.first_child().attrs['y'] = node.attrs['y'] - 0.19
+                numerador = ns.index(node.children[1]) - 1
+                if ns[numerador].parent.type == 'u' or ns[numerador].parent.type =='pu':
+                    node.last_child().attrs['y1'] = node.attrs['y'] - 0.28*node.attrs['y'] + 0.1
+                else:
+                    node.last_child().attrs['y1'] = node.attrs['y'] - 0.28*node.attrs['y']
+                node.last_child().attrs['y2'] = node.last_child().attrs['y1']
             elif node.type == 'parens':
                 pass
             elif node.type == 'brackets':
-                pass
+                node.first_child().copy_node_attrs(node)
             else:
                 if node.parent.type == 'concat':
-                    try:
-                        ns[index+1].x = node.x+0.6*node.z
-                        ns[index+1].y = node.y
-                        ns[index+1].z = node.z
-                    except:
-                        pass
+                    if (index+1<len(ns)):
+                        ns[index+1].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                        ns[index+1].attrs['y'] = node.attrs['y']
+                        ns[index+1].attrs['z'] = node.attrs['z']
+
                 elif node.parent.type == 'p':
-                    try:
-                        if (node.leftSibling == None):
-                            ns[index+1].x = node.x+0.6*node.z
-                            ns[index+1].y = node.y-0.45
-                            ns[index+1].z = 0.7*node.z
-                        else:
-                            ns[index+1].copy_node_attrs(node.parent)
-                            ns[index+1].x = node.x+0.6*node.z
-                    except:
-                        pass
+                    if (node.left_sibling == None):
+                        node.right_sibling.attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                        node.right_sibling.attrs['y'] = node.attrs['y']-0.45
+                        node.right_sibling.attrs['z'] = node.attrs['z']*0.7
+                    else:
+                        if (index+1<len(ns)):
+                            ns[index+1].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                            ns[index+1].attrs['y'] = node.parent.attrs['y']
+                            ns[index+1].attrs['z'] = node.parent.attrs['z']
+
                 elif node.parent.type == 'u':
-                    try:
-                        if (node.leftSibling == None):
-                            ns[index+1].x = node.x+0.6*node.z
-                            ns[index+1].y = node.y+0.25
-                            ns[index+1].z = 0.7*node.z
-                        else:
-                            ns[index+1].copy_node_attrs(node.parent)
-                            ns[index+1].x = node.x+0.6*node.z
-                    except:
-                        pass
+                    if (node.left_sibling == None):
+                        node.right_sibling.attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                        node.right_sibling.attrs['y'] = node.attrs['y']+0.25
+                        node.right_sibling.attrs['z'] = 0.7*node.attrs['z']
+                    else:
+                        if (index+1<len(ns)):
+                            ns[index+1].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                            ns[index+1].attrs['y'] = node.parent.attrs['y']
+                            ns[index+1].attrs['z'] = node.parent.attrs['z']
+
                 elif node.parent.type == 'pu':
-                    try:
-                        if (node.leftSibling == None):
-                            ns[index+1].x = node.x+0.6*node.z
-                            ns[index+1].y = node.y-0.45
-                            ns[index+1].z = 0.7*node.z
-                            ns[index+2].x = node.x+0.6*node.z
-                            ns[index+2].y = node.y+0.25
-                            ns[index+2].z = 0.7*node.z
-                        elif (node.rightSibling == None):
-                            ns[index+1].copy_node_attrs(node.parent)
-                            ns[index+1].x = node.x+0.6*node.z
-                    except:
-                        pass
+                    if (node.left_sibling == None):
+                        ns[index+1].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                        ns[index+1].attrs['y'] = node.attrs['y']-0.45
+                        ns[index+1].attrs['z'] = 0.7*node.attrs['z']
+                        ns[index+2].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                        ns[index+2].attrs['y'] = node.attrs['y']+0.25
+                        ns[index+2].attrs['z'] = 0.7*node.attrs['z']
+                    elif (node.right_sibling == None):
+                        if (index+1<len(ns)):
+                            ns[index+1].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                            ns[index+1].attrs['y'] = node.attrs['y']
+                            ns[index+1].attrs['z'] = node.attrs['z']
+
                 elif node.parent.type == 'divide':
-                    try:
-                        if (node.leftSibling == None):
-                            ns[index+1].x = node.x
-                            ns[index+1].z = node.z
-                            ns[index+1].y = node.y + 0.95
-                        elif (node.rightSibling != None):
-                            ns[index+1].x = node.x+0.6*node.z
-                            ns[index+1].z = node.z
+                    
+                    if (node.left_sibling == None):
+                        node.right_sibling.attrs['x'] = node.attrs['x']
+                        node.right_sibling.attrs['y'] = node.attrs['y']
+                        node.right_sibling.attrs['z'] = node.attrs['z']
+
+                    elif (node.right_sibling != None):
+                        node.right_sibling.attrs['x'] = node.attrs['x'] +0.6*node.attrs['z']
+                        node.right_sibling.attrs['y'] = node.attrs['y']
+                        node.right_sibling.attrs['z'] = node.attrs['z']
+
+                    else:
+                        long_a = node.left_sibling.attrs['x'] - node.first_sibling().attrs['x']
+                        long_b = node.attrs['x'] - node.left_sibling.attrs['x']
+
+                        inicio_a = node.first_sibling().attrs['x']
+                        fin_a = node.left_sibling.attrs['x']
+
+                        #node.left_sibling.move(0,node.left_sibling.attrs['y'] - node.parent.attrs['y'] + 0.95)
+
+                        if node.left_sibling.type == 'p' or node.left_sibling.type == 'pu':
+                            node.left_sibling.move(-long_a,1.05)
                         else:
-                            node.leftSibling.y = node.parent.y + 0.95
-                            long_a = node.leftSibling.x - node.parent.children[0].x
-                            long_b = node.x - node.leftSibling.x
-                            if (long_a >= long_b):
-                                # inicial A - final A
-                                node.x1 = node.parent.children[0].x
-                                node.x2 = node.leftSibling.x
-                                ns[index+1].x = node.x2
-                                # centrar B
-                                node.leftSibling.x = node.parent.children[0].x + ((long_a-long_b)/2.0)
+                            node.left_sibling.move(-long_a,0.95)
+
+                        inicio_b = node.left_sibling.attrs['x']
+                        fin_b = node.attrs['x']-long_a
+        
+                        node.attrs['x1'] = node.first_sibling().attrs['x']
+                        if (long_a > long_b):
+                            
+                            node.attrs['x2'] = fin_a
+                            
+                            # centrar B
+                            node.left_sibling.move(((long_a-long_b)/2.0),0)
+
+                        else:
+
+                            node.attrs['x2'] = fin_b
+                            
+                            # centrar A
+                            node.first_sibling().move(((long_b-long_a)/2.0),0)
+                        
+                        if (index+1<len(ns)):    
+                            ns[index+1].attrs['x'] = node.attrs['x2']
+                            ns[index+1].attrs['y'] = node.attrs['y2']        
+                elif node.parent.type == 'brackets':
+                    if (node.left_sibling == None):
+                        node.right_sibling.copy_node_attrs(node)
+                    elif (node.right_sibling != None):
+                        node.right_sibling.attrs['x'] = node.attrs['x'] +0.6*node.attrs['z']
+                        node.right_sibling.attrs['y'] = node.attrs['y']
+                        node.right_sibling.attrs['z'] = node.attrs['z']
+                    else:
+                        if (index+1<len(ns)):
+                            ns[index+1].attrs['x'] = node.attrs['x']
+                            if ((node.parent.parent == None or node.parent.parent.type == 'p' or node.parent.parent.type == 'u') and node.parent.left_sibling!=None):
+                                ns[index+1].attrs['y'] = node.parent.left_sibling.attrs['y']
+                                ns[index+1].attrs['z'] = node.parent.left_sibling.attrs['z']
                             else:
-                                # inicial B - final B
-                                node.x1 = node.leftSibling.x
-                                node.x2 = node.x
-                                ns[index+1].x = node.x2
-                                # centrar A
-                                node.parent.children[0].x = node.leftSibling.x + ((long_b-long_a)/2.0)
-                    except Exception as e:
-                        print e
+                                ns[index+1].attrs['y'] = node.attrs['y']
+                                ns[index+1].attrs['z'] = node.attrs['z']
+
 
             index += 1
         return ns[0]
