@@ -66,22 +66,5 @@ class SVGBuilder:
                     svg.appendText(node.type, str(node.attrs['x']), str(node.attrs['y']), str(node.attrs['z']))
         return svg
 
-#ejCatedra
-#svg = SVG()
-#svg.appendText('(','0','0','1','0', '1.36875', '1', '2.475')
-#svg.appendText('A','.69','.53','1')
-#svg.appendText('B','1.29','0.08','.7')
-#svg.appendText('C','1.71','.53','1')
-#svg.appendText('D','2.31','0.08','.7')
-#svg.appendLine('0.6','0.72','2.82','.72')
-#svg.appendText('E','.6','1.68','1')
-#svg.appendText('G','1.2','1.93','.7')
-#svg.appendText('F','1.2','1.23','.7')
-#svg.appendText('+','1.62','1.68','1')
-#svg.appendText('H','2.22','1.68','1')
-#svg.appendText(')','0','0','1','2.82', '1.36875', '1', '2.475')
-#svg.appendText('-','3.42','1','1')
-#svg.appendText('I','4.02','1','1')
-#svg.save('test.svg')
         
 
