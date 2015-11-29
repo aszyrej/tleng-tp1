@@ -18,17 +18,8 @@ class Node:
               self.children = [ ]
 
     def __str__(self):
-        if (self.parent == None): par = ""
-        else: par = self.parent.type
-        if (self.left_sibling == None): lSib = ""
-        else: lSib = self.left_sibling.type
-        if (self.right_sibling == None): rSib = ""
-        else: rSib = self.right_sibling.type 
         return "(type: " + self.type \
-            + ", par: " + par \
-            + ", lSib: " + lSib \
-            + ", rSib: " + rSib \
-            + ", children: " + str(self.children) \
+            + ", attrs: " + str(self.attrs) \
             + ")"
 
     def __repr__(self):
@@ -59,6 +50,19 @@ class Node:
             self.attrs['y2'] += y
         for n in self.children:
             n.move(x,y)
+
+    def find_higher_and_lower_attrs(self):
+        res = {}
+        for n in self.preorder():
+            for a in n.attrs.keys():
+                if not(a in res):
+                    res[a] = [None]*2
+                if res[a][0]==None or res[a][0]>n.attrs[a]:                   
+                    res[a][0] = n.attrs[a]
+                if res[a][1]==None or res[a][1]<n.attrs[a]:
+                    res[a][1] = n.attrs[a]
+        return res  
+
 
     def preorder(self):
         res = [self]

@@ -108,18 +108,18 @@ class ASTProcessor:
                     elif (node.right_sibling == None):
                         if (index+1<len(ns)):
                             ns[index+1].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
-                            ns[index+1].attrs['y'] = node.attrs['y']
-                            ns[index+1].attrs['z'] = node.attrs['z']
+                            ns[index+1].attrs['y'] = node.parent.attrs['y']
+                            ns[index+1].attrs['z'] = node.parent.attrs['z']
 
                 ## caso DIVIDE.
                 elif node.parent.type == 'divide':
                     if (node.left_sibling == None):
-                        node.right_sibling.attrs['x'] = node.attrs['x']
+                        node.right_sibling.attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
                         node.right_sibling.attrs['y'] = node.attrs['y']
                         node.right_sibling.attrs['z'] = node.attrs['z']
 
                     elif (node.right_sibling != None):
-                        node.right_sibling.attrs['x'] = node.attrs['x'] +0.6*node.attrs['z']
+                        node.right_sibling.attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
                         node.right_sibling.attrs['y'] = node.attrs['y']
                         node.right_sibling.attrs['z'] = node.attrs['z']
 
@@ -129,32 +129,37 @@ class ASTProcessor:
                         long_a = node.left_sibling.attrs['x'] - node.first_sibling().attrs['x']
                         long_b = node.attrs['x'] - node.left_sibling.attrs['x']
 
-                        inicio_a = node.first_sibling().attrs['x']
-                        fin_a = node.left_sibling.attrs['x']
-
-                        #node.left_sibling.move(0,node.left_sibling.attrs['y'] - node.parent.attrs['y'] + 0.95)
+                        # node.left_sibling.move(0,node.left_sibling.attrs['y'] - node.parent.attrs['y'] + 0.95)
 
                         if node.left_sibling.type == 'p' or node.left_sibling.type == 'pu':
                             node.left_sibling.move(-long_a,1.05)
                         else:
                             node.left_sibling.move(-long_a,0.95)
 
+                        inicio_a = node.first_sibling().attrs['x']
+                        fin_a = node.left_sibling.attrs['x']
                         inicio_b = node.left_sibling.attrs['x']
                         fin_b = node.attrs['x']-long_a
         
                         node.attrs['x1'] = node.first_sibling().attrs['x']
+                        print long_a
+                        print long_b
                         # centrar B
                         if (long_a > long_b):
                             node.attrs['x2'] = fin_a
                             node.left_sibling.move(((long_a-long_b)/2.0),0)
                         # centrar A
-                        else:
+                        elif (long_a < long_b):
                             node.attrs['x2'] = fin_b
                             node.first_sibling().move(((long_b-long_a)/2.0),0)
+                        else:
+                            node.attrs['x2'] = fin_b
                         
                         if (index+1<len(ns)):    
                             ns[index+1].attrs['x'] = node.attrs['x2']
                             ns[index+1].attrs['y'] = node.attrs['y2'] 
+                            ns[index+1].attrs['z'] = node.attrs['z'] 
+
                 ## caso LLAVES.
                 elif node.parent.type == 'brackets':
                     ## caso '{': copia la informacion al nodo derecho.
@@ -176,10 +181,14 @@ class ASTProcessor:
                             else:
                                 ns[index+1].attrs['y'] = node.attrs['y']
                                 ns[index+1].attrs['z'] = node.attrs['z']
+
+                ## caso PARENTESIS
                 elif node.parent.type == 'parens':
-                    ## caso '(': copia la informacion al nodo derecho.
+                    ## caso '(': copia la informacion al nodo derecho avanzando 'x'
                     if (node.left_sibling == None):
-                        node.right_sibling.copy_node_attrs(node)
+                        node.right_sibling.attrs['x'] = node.attrs['x'] +0.6*node.attrs['z']
+                        node.right_sibling.attrs['y'] = node.attrs['y']
+                        node.right_sibling.attrs['z'] = node.attrs['z']
                     ## caso E:  avanza la variable 'x'
                     elif (node.right_sibling != None):
                         node.right_sibling.attrs['x'] = node.attrs['x'] +0.6*node.attrs['z']
@@ -188,6 +197,11 @@ class ASTProcessor:
                     ## caso ')': estira el '(' y reestablece la configuracion de ')' para
                     ## el siguiente nodo en el PREORDER.
                     else:
+                        h_l_attrs = node.left_sibling.find_higher_and_lower_attrs()
+                        node.first_sibling().attrs['y1'] = h_l_attrs['y'][0]
+                        node.first_sibling().attrs['y2'] = h_l_attrs['y'][1]
+                        node.attrs['y1'] = h_l_attrs['y'][0]
+                        node.attrs['y2'] = h_l_attrs['y'][1]
                         if (index+1<len(ns)):
                             ns[index+1].attrs['x'] = node.attrs['x']
                             if ((node.parent.parent == None or node.parent.parent.type == 'p' or node.parent.parent.type == 'u') and node.parent.left_sibling!=None):

@@ -60,10 +60,20 @@ class SVGBuilder:
             elif node.type == '{}':
                 pass
             else:
-                if(node.type == 'barra'):
+                if (node.type == 'barra'):
                     svg.appendLine(str(node.attrs['x1']), str(node.attrs['y1']), str(node.attrs['x2']), str(node.attrs['y2']))
-                elif(node.type != 'brackets' and node.type != '{' and node.type != '}'):
+                elif (node.type == '(' or node.type == ')'):
+                    largo_paren = float(node.attrs['y2'])-float(node.attrs['y1'])+float(node.attrs['z'])
+                    y = largo_paren/2.0
+                    print largo_paren
+                    print y
+                    if node.type == '(':
+                        svg.appendText('(', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y), str(node.attrs['z']), str(largo_paren))
+                    else:
+                        svg.appendText(')', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y), str(node.attrs['z']), str(largo_paren))
+                elif (node.type != 'brackets' and node.type != 'parens' and node.type != '{' and node.type != '}'):
                     svg.appendText(node.type, str(node.attrs['x']), str(node.attrs['y']), str(node.attrs['z']))
+
         return svg
 
         
