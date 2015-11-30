@@ -20,6 +20,7 @@ class Node:
     def __str__(self):
         return "(type: " + self.type \
             + ", attrs: " + str(self.attrs) \
+            + ", children" + str(self.children) \
             + ")"
 
     def __repr__(self):

@@ -43,6 +43,10 @@ class Parser:
                   debugfile=self.debugfile,
                   tabmodule=self.tabmodule)
 
+    def parse(self, exp):
+        ast = Tree(yacc.parse(exp))
+        return ast
+
     def run(self):
         while 1:
             try:
@@ -187,10 +191,7 @@ class Form(Parser):
         pass
 
     def p_error(self,p):
-        if p:
-            print("Syntax error at '%s'" % p.value)
-        else:
-            print("Syntax error at EOF")
+        raise Exception("Syntax error at '%s'" % p.value)
 
 if __name__ == '__main__':
     form = Form()
