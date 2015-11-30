@@ -135,14 +135,11 @@ class ASTProcessor:
                         # movemos el denominador en el eje x e y segun las expresiones
                         # que haya
 
-                        print node.left_sibling
-                        print
                         if node.parent.branch_has_type(['p', 'pu', 'divide']):
                             node.left_sibling.move(-long_a,1.25)
                         else:
                             node.left_sibling.move(-long_a,1.05)
-                        print node.left_sibling
-                        
+                                                    
                         inicio_b = node.left_sibling.attrs['x']
                         fin_b = node.attrs['x']-long_a
         
