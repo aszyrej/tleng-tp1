@@ -77,11 +77,6 @@ donde $'c'$ es un caracter cualquiera por fuera de los anteriores, representado 
 Acto seguido, definimos las reglas. Las reglas se mapean una a una con la gram\'atica $G_2$ definida anteriormente. 
 Para facilitar el armado del archivo SVG, construimos una estructura del tipo \'arbol denominada Abstract Syntax Tree. Luego, por cada regla definida en el parseo se genera un nuevo nodo en el \'arbol, de forma que quede definida la estructura del input de forma sencilla para un posterior procesamiento del mismo en la construcci\'on del output.
 
-Ejemplo:
-
-COMMENT: INSERT EXAMPLE OF AN AST STRUCTURE
-
-
 
 \end{subsection}
 \end{section}
@@ -131,17 +126,19 @@ Los casos m\'as complejos se llevan a cabo en las hojas. Primeramente se diferen
 \item Terminal de un sub\'indice: Similar al caso anterior, pero con al y se lo aumenta para situar al proximo elemento por debajo del anterior.
 \item Terminal de un super-sub\'indice: Aqu\'i se combinan los dos casos anteriores, tratando al primero como el caso 2 y al segundo como el caso 3.
 \item Terminal de una divisi\'on: El caso, sin dudas, m\'as complejo. Tanto numerador como denominador, de ser terminales funcionan como si fueran hijos de una concatenaci\'on. Quien se encarga de armar la divisi\'on es el \'ultimo nodo terminal del $divide$, la barra. Esta en primer lugar baja el denominador y lo situa justo debajo del numerador, arrancando ambos en el mismo x. Calcula las longitudes de ambos para as\'i luego centrar al de menos longitud con respecto al otro, y luego setea sus atributos de barra especiales x1 y x2, siendo estos los extremos del opera dor con mayor longitud. 
-\item Terminal de un nodo par\'entesis: 
-\item Terminal de un nodo llaves: 
+\item Terminal de un nodo par\'entesis: Tanto el par\'entesis de apertura como el nodo central de ser terminal escriben sobre el siguiente en el preorder los atributos actuales, moviendo el x con el aumento. Es el par\'entesis de cierre el que, teniendo ya parseada la estructura central, setea los valores correspondientes al transform para el svg. Para ello, busca en la estructura contenida en las llaves el m\'inimo y el m\'aximo $y$, de forma tal de poder calcular que tanto debe estirarse.
+\item Terminal de un nodo llaves: Similar al caso anterior, es la llave de cierra la que guarda la l\'ogica m\'as importante, la de restaurar la configuraci\'on previa. Para ello chequea si el hermano del nodo padre era un sub o un super\'indice, de modo tal de poder tomar el font-size y el $y$ que corresponden para pasarle esos valores al pr\'oximo nodo. De lo contrario, s\'olo transmite los datos tal cual los tiene.
 
 \end{itemize}
+
+Luego de recorrer todo el AST, y teniendo en cada nodo los atributos con los que se completa el text tag del xml SVG, s\'olo resta en s\'i armarlo. Para ello usamos otro m\'odulo SVG Builder, comentado a continuaci\'on.
 
 \end{subsection}
 
 \begin{subsection}{SVG Builder}
 
-
-
+El m\'odulo SVGBuilder es una simple clase que nos abstrae de la creaci\'on del archivo SVG. Utiliza el m\'odulo xml.etree.ElementTree para manejar XMLs.
+Recorre en preorder el \'arbol AST y por cada nodo, sabiendo de que tipo es, lo escribe en el XML usando sus atributos, teniendo especial cuidado cuando el nodo es un par\'entesis o una barra divisoria.
 \end{subsection}
 
 \end{section}
