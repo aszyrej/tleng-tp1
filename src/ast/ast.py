@@ -97,12 +97,12 @@ class ASTProcessor:
                     ## caso nodo izquierdo de PU. Seteamos las varibles del nodo superindice
                     ## y subindice
                     if (node.left_sibling == None):
-                        ns[index+1].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
-                        ns[index+1].attrs['y'] = node.attrs['y']-0.45
-                        ns[index+1].attrs['z'] = 0.7*node.attrs['z']
-                        ns[index+2].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
-                        ns[index+2].attrs['y'] = node.attrs['y']+0.25
-                        ns[index+2].attrs['z'] = 0.7*node.attrs['z']
+                        node.right_sibling.attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                        node.right_sibling.attrs['y'] = node.attrs['y']-0.45
+                        node.right_sibling.attrs['z'] = 0.7*node.attrs['z']
+                        node.last_sibling().attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                        node.last_sibling().attrs['y'] = node.attrs['y']+0.25
+                        node.last_sibling().attrs['z'] = 0.7*node.attrs['z']
                     ## caso nodo derecho de PU: restablecemos los valores de 'y' y 'z'
                     ## y avanzamos la variable 'x'
                     elif (node.right_sibling == None):
@@ -175,11 +175,8 @@ class ASTProcessor:
                     ## el siguiente nodo en el PREORDER.
                     else:
                         if (index+1<len(ns)):
-                            ns[index+1].attrs['x'] = node.attrs['x']
-                            if ((node.parent.parent == None or node.parent.parent.type == 'p' or node.parent.parent.type == 'u') and node.parent.left_sibling!=None):
-                                ns[index+1].attrs['y'] = node.parent.left_sibling.attrs['y']
-                                ns[index+1].attrs['z'] = node.parent.left_sibling.attrs['z']
-                            else:
+                            if ns[index+1].type!='brackets' or node.parent.parent==None or (node.parent.parent.type != 'p' and node.parent.parent.type != 'u' and node.parent.parent.type != 'pu'):
+                                ns[index+1].attrs['x'] = node.attrs['x']
                                 ns[index+1].attrs['y'] = node.attrs['y']
                                 ns[index+1].attrs['z'] = node.attrs['z']
 
@@ -206,11 +203,9 @@ class ASTProcessor:
                         node.attrs['y'] = node.first_sibling().attrs['y']
                         y_paren = (float(node.attrs['y2'])-float(node.attrs['y1']))*0.3
                         if (index+1<len(ns)):
-                            ns[index+1].attrs['x'] = node.attrs['x'] +0.6*node.attrs['z']
-                            if ((node.parent.parent == None or node.parent.parent.type == 'p' or node.parent.parent.type == 'u') and node.parent.left_sibling!=None):
-                                ns[index+1].attrs['y'] = y_paren
-                                ns[index+1].attrs['z'] = node.parent.left_sibling.attrs['z']
-                            else:
-                                ns[index+1].attrs['y'] = y_paren
-                                ns[index+1].attrs['z'] = node.attrs['z']
+                            if (index+1<len(ns)):
+                                if ns[index+1].type!='parens' or node.parent.parent==None or (node.parent.parent.type != 'p' and node.parent.parent.type != 'u' and node.parent.parent.type != 'pu'):
+                                    ns[index+1].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
+                                    ns[index+1].attrs['y'] = y_paren
+                                    ns[index+1].attrs['z'] = node.attrs['z']
             index += 1
