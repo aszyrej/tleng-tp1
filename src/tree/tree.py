@@ -64,13 +64,10 @@ class Node:
         return res 
 
     def branch_has_type(self, types):
-        index = 0
         for n in self.preorder():
-            if index!=0:
-                for t in types:
-                    if n.type == t:
-                        return True
-            index+=1
+            for t in types:
+                if n.type == t:
+                    return True
         return False
 
 

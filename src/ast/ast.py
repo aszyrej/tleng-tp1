@@ -135,10 +135,10 @@ class ASTProcessor:
                         # movemos el denominador en el eje x e y segun las expresiones
                         # que haya
 
-                        if node.parent.branch_has_type(['p', 'pu', 'divide']):
-                            node.left_sibling.move(-long_a,1.25)
+                        if node.left_sibling.branch_has_type(['p', 'pu', 'divide']):
+                            node.left_sibling.move(-long_a,node.attrs['z']+0.20)
                         else:
-                            node.left_sibling.move(-long_a,1.05)
+                            node.left_sibling.move(-long_a,node.attrs['z']-0.09)
                                                     
                         inicio_b = node.left_sibling.attrs['x']
                         fin_b = node.attrs['x']-long_a
@@ -158,7 +158,7 @@ class ASTProcessor:
                         
                         if (index+1<len(ns)):    
                             ns[index+1].attrs['x'] = node.attrs['x2']
-                            ns[index+1].attrs['y'] = node.first_sibling().attrs['y']
+                            ns[index+1].attrs['y'] = node.first_sibling().attrs['y']-0.19
                             ns[index+1].attrs['z'] = node.attrs['z'] 
 
                 ## caso LLAVES.
