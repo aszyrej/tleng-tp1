@@ -35,7 +35,7 @@ Primeramente consideramos el orden de presedencia dispuesto en el enunciado. Lue
   
 ~
 
-Luego G1 qued\'o determinada por el siguiente conjunto de producciones:
+Luego $G_{1}$ qued\'o determinada por el siguiente conjunto de producciones:
 \newline \underline{E $\rightarrow$ E / T $|$ T}
 \newline \underline{T $\rightarrow$ T F $|$ F}
 \textbf{\newline F $\rightarrow$ I \^{} G $|$ G $|$ I \_ H $|$ H
@@ -48,25 +48,101 @@ Luego G1 qued\'o determinada por el siguiente conjunto de producciones:
 Notar que las producciones subrayadas son recursivas a izquierda, lo cual genera conflictos. 
 Las producciones en negrita generaron otros problemas. En estas se debe factorizar a izquiera para no tener conflictos.
 
-Finalmente la gram\'atica qued\'o de la pinta G2:
+Finalmente la gram\'atica qued\'o de la pinta $G_{2}$:
 \newline E $\rightarrow$ T A
-\newline A $\rightarrow$ / T A $|$ lambda
+\newline A $\rightarrow$ / T A $| \; \lambda$
 \newline T $\rightarrow$ F B
-\newline B $\rightarrow$ F B $|$ lambda
+\newline B $\rightarrow$ F B $| \; \lambda$
 \newline F $\rightarrow$ I G
-\newline G $\rightarrow$ \^{} I H $|$ \_ I L $|$ lambda
-\newline H $\rightarrow$ \_ I $|$ lambda
-\newline L $\rightarrow$ \^{} I $|$ lambda
+\newline G $\rightarrow$ \^{} I H $|$ \_ I L $| \; \lambda$
+\newline H $\rightarrow$ \_ I $| \; \lambda$
+\newline L $\rightarrow$ \^{} I $| \; \lambda$
 \newline I $\rightarrow$ (E) $|$ \{E\} $|$ c
   
 ~
 
 donde la recursion a izquierda fue eliminada introduciendo las producciones de A y B, y los conflictos de F G y H fueron resueltos subiendo los casos de G y H hasta F y tomando factor com\'un a izquierda.
 
+Con esta nueva gram\'atica $G_{2}$ no ambigua, cuyo lenguaje es el mismo que para L(G), pudimos avanzar sobre el m\'odulo de herramientas Lex \& Yacc para proceder al an\'alisis l\'exico y sint\'actico.
+
+\end{subsection}
+\begin{subsection}{Parsing on Python}
+
+Utilizamos $ply$ para generar c\'odigo python. En un primer momento definimos los tokens esperados. Los mismos son los que incluye la gram\'atica, es decir tokens = ['(',')','\{','\}','\^{}','\_','/',c]
+
+donde $'c'$ es un caracter cualquiera por fuera de los anteriores, representado con una expresion regular. (NOTA: asumimos c como caracter alfa-num\'erico. Caracteres ASCII podr\'ian fallar)
+
+~
+
+Acto seguido, definimos las reglas. Las reglas se mapean una a una con la gram\'atica $G_2$ definida anteriormente. 
+Para facilitar el armado del archivo SVG, construimos una estructura del tipo \'arbol denominada Abstract Syntax Tree. Luego, por cada regla definida en el parseo se genera un nuevo nodo en el \'arbol, de forma que quede definida la estructura del input de forma sencilla para un posterior procesamiento del mismo en la construcci\'on del output.
+
+Ejemplo:
+
+COMMENT: INSERT EXAMPLE OF AN AST STRUCTURE
+
+
+
 \end{subsection}
 \end{section}
 
-\begin{section}{Parte II: Construcci\'on SVG}
+\begin{section}{Parte II: Construcci\'on del output SVG}
+
+\begin{subsection}{Aclaraciones especiales}
+El archivo de salida es un XML especial, que debe interpretarse como formato de imagen vectorial SVG. Los archivos deben visualizarse mediante el navegador \textbf{Google Chrome}. Otros medios pueden fallar al querer visualizar correctamente los archivos.
+\end{subsection}
+
+\begin{subsection}{Armado de un Abstract Syntax Tree}
+
+El AST consta de siete nodos distintos:
+
+\begin{itemize}
+
+\item Nodo Divisi\'on ($divide$), con dos hijos numerador ($A$) y denominador ($B$), m\'as un tercero que modela la barra divisoria ($\frac{A}{B}$)
+\item Nodo Concatenaci\'on ($concat$), con dos hijos A y B modelando la concatenaci\'on de A con B ($AB$)
+\item Nodo Super\'indice ($p$), con dos hijos A y B modelando a B como super\'indice de A ($A^{B}$)
+\item Nodo Sub\'indice ($u$), con dos hijos A y B modelando a B como sub\'indice de A ($A_{B}$)
+\item Nodo Super-Sub\'indice ($pu$), con tres hijos A B y C modelando a B como super\'indice de A y C como sub\'indice de A ($A^{B}_{C}$)
+\item Nodo Par\'entesis ($parens$), con tres hijos '(', E, ')'
+\item Nodo Llaves ($brackets$), con tres hijos '\{', E, '\}'
+
+
+\end{itemize}
+
+
+Por simplicidad se omiti\'o el nodo Sub-Super\'indice a\'un cuando la gram\'atica lo permite, ya que en caso de llegar a un caso de ese estilo al parsear la entrada, simplemente se invierten los parametros al crear el nodo. 
+
+Cada Nodo del \'arbol tiene los atributos que se setean en cada text tag del xml SVG: x, y, z; con z igual al font-size. As\'i mismo, nodos particulares como la barra divisoria poseen atributos especiales: x1,x2,y1,y2 por ejemplo. Adem\'as, todo nodo conoce a su nodo padre y sus nodos hermanos, puede ver sus atributos e incluso copiarles su informaci\'on.
+
+Para verificar la perfecta construcci\'on de esta estructura se gener\'o una bateria de tests especificos para comprobar que para ciertos casos el \'arbol generado se corresponda con el esperado.
+
+\end{subsection}
+
+\begin{subsection}{Procesamiento del AST}
+
+Para recorrer el AST generado en tiempo de parsing decidimos utilizar preorder y diferenciar en cada paso los casos en los cuales nos paramos sobre un nodo terminal, es decir una hoja, o si es un nodo no-terminal.
+Por lo general, el caso de los no-terminales s\'olo baja los atributos a las hojas, para que el procesamiento fino se lleve a cabo en ellas. A excepci\'on del caso de la divisi\'on, donde el propio nodo padre setea los valores y1 e y2 de la barra, y chequea que se ajuste bien considerando casos en los que el numerador posee un sub\'indice o el denominador un super\'indice
+Los casos m\'as complejos se llevan a cabo en las hojas. Primeramente se diferencia de acuerdo a que tipo tiene el padre del nodo terminal.
+
+\begin{itemize}
+
+\item Terminal de una concatenaci\'on: Se copia al siguiente en el preorder el y con m\'as el font-size del padre, y al x se le suma un 60\% del font-size.
+\item Terminal de un super\'indice: Se copia al siguiente en el preorder el x con un aumento igual al caso anterior, el y se reduce en una constante para situarlo por encima del caracter anterior y al fontsize se lo setea como un 70\% del anterior.
+\item Terminal de un sub\'indice: Similar al caso anterior, pero con al y se lo aumenta para situar al proximo elemento por debajo del anterior.
+\item Terminal de un super-sub\'indice: Aqu\'i se combinan los dos casos anteriores, tratando al primero como el caso 2 y al segundo como el caso 3.
+\item Terminal de una divisi\'on: El caso, sin dudas, m\'as complejo. Tanto numerador como denominador, de ser terminales funcionan como si fueran hijos de una concatenaci\'on. Quien se encarga de armar la divisi\'on es el \'ultimo nodo terminal del $divide$, la barra. Esta en primer lugar baja el denominador y lo situa justo debajo del numerador, arrancando ambos en el mismo x. Calcula las longitudes de ambos para as\'i luego centrar al de menos longitud con respecto al otro, y luego setea sus atributos de barra especiales x1 y x2, siendo estos los extremos del opera dor con mayor longitud. 
+\item Terminal de un nodo par\'entesis: 
+\item Terminal de un nodo llaves: 
+
+\end{itemize}
+
+\end{subsection}
+
+\begin{subsection}{SVG Builder}
+
+
+
+\end{subsection}
 
 \end{section}
 
