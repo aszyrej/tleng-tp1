@@ -66,9 +66,9 @@ class SVGBuilder:
                     y = largo_paren-float(node.attrs['z'])
                     
                     if node.type == '(':
-                        svg.appendText('(', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y), str(node.attrs['z']), str(largo_paren))
+                        svg.appendText('(', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y - 0.4*y), str(node.attrs['z']), str(largo_paren))
                     else:
-                        svg.appendText(')', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y), str(node.attrs['z']), str(largo_paren))
+                        svg.appendText(')', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y - 0.4*y), str(node.attrs['z']), str(largo_paren))
                 elif (node.type != 'brackets' and node.type != 'parens' and node.type != '{' and node.type != '}'):
                     svg.appendText(node.type, str(node.attrs['x']), str(node.attrs['y']), str(node.attrs['z']))
 
