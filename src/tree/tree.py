@@ -39,18 +39,17 @@ class Node:
         return self.parent.children[-1]
 
     def move(self,x,y):
-        self.attrs['x'] += x
-        self.attrs['y'] += y
-        if 'x1' in self.attrs:
-            self.attrs['x1'] += x
-        if 'x2' in self.attrs:
-            self.attrs['x2'] += x
-        if 'y1' in self.attrs:
-            self.attrs['y1'] += y
-        if 'y2' in self.attrs:
-            self.attrs['y2'] += y
-        for n in self.children:
-            n.move(x,y)
+        for n in self.preorder():
+            n.attrs['x'] += x
+            n.attrs['y'] += y
+            if 'x1' in n.attrs:
+                n.attrs['x1'] += x
+            if 'x2' in n.attrs:
+                n.attrs['x2'] += x
+            if 'y1' in n.attrs:
+                n.attrs['y1'] += y
+            if 'y2' in n.attrs:
+                n.attrs['y2'] += y
 
     def find_higher_and_lower_attrs(self):
         res = {}
@@ -62,7 +61,17 @@ class Node:
                     res[a][0] = n.attrs[a]
                 if res[a][1]==None or res[a][1]<n.attrs[a]:
                     res[a][1] = n.attrs[a]
-        return res  
+        return res 
+
+    def branch_has_type(self, types):
+        index = 0
+        for n in self.preorder():
+            if index!=0:
+                for t in types:
+                    if n.type == t:
+                        return True
+            index+=1
+        return False
 
 
     def preorder(self):

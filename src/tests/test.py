@@ -48,7 +48,7 @@ class TestParser(unittest.TestCase):
         res_expected = ["u", "A", "B"]
         self.assertEqual(res_actual, res_expected)
 
-    def test_parentesis(self):
+    def test_parentesis1(self):
         exp = "(A)"
         ast = self.form.parse(exp)
         ns = ast.root.preorder()
@@ -64,7 +64,7 @@ class TestParser(unittest.TestCase):
         res_expected = ['concat', 'brackets', '{', 'divide', 'A', 'B', 'barra', '}', 'C']
         self.assertEqual(res_actual, res_expected)
 
-    def test_llaves(self):
+    def test_parentesis2(self):
         exp = "(A/B)C"
         ast = self.form.parse(exp)
         ns = ast.root.preorder()
@@ -78,14 +78,6 @@ class TestParser(unittest.TestCase):
         ns = ast.root.preorder()
         res_actual = [n.type for n in ns]
         res_expected = ["pu", "A", "B", "C"]
-        self.assertEqual(res_actual, res_expected)
-
-    def test_combinado1(self):
-        exp = "(A^BC^D/E^F_G+H)I"
-        ast = self.form.parse(exp)
-        ns = ast.root.preorder()
-        res_actual = [n.type for n in ns]
-        res_expected = ["concat", "parens", "(", "divide", "concat", "p", "A", "B", "p", "C", "D", "concat", "pu", "E", "F", "G", "concat", "+", "H", "barra", ")", "concat", "", "I"]
         self.assertEqual(res_actual, res_expected)
 
     def test_combinado1(self):
