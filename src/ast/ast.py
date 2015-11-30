@@ -19,7 +19,7 @@ class ASTProcessor:
         ast.root.attrs['x'] = 0
         ast.root.attrs['y'] = 0
         ast.root.attrs['z'] = 1
-        ns = ast.preorder_traversal()       
+        ns = ast.preorder_traversal()
         index = 0
         for node in ns:
 
@@ -129,27 +129,22 @@ class ASTProcessor:
                         long_a = node.left_sibling.attrs['x'] - node.first_sibling().attrs['x']
                         long_b = node.attrs['x'] - node.left_sibling.attrs['x']
 
-                        # node.left_sibling.move(0,node.left_sibling.attrs['y'] - node.parent.attrs['y'] + 0.95)
-
                         inicio_a = node.first_sibling().attrs['x']
                         fin_a = node.left_sibling.attrs['x']
 
-                        if node.left_sibling.type == 'p' or node.left_sibling.type == 'pu':
-                            node.left_sibling.move(-long_a,1.05)
+                        # movemos el denominador en el eje x e y segun las expresiones
+                        # que haya
+
+                        if node.parent.branch_has_type(['p', 'pu', 'divide']):
+                            node.left_sibling.move(-long_a,1.25)
                         else:
-                            node.left_sibling.move(-long_a,0.95)
-                        
+                            node.left_sibling.move(-long_a,1.05)
+                                                    
                         inicio_b = node.left_sibling.attrs['x']
                         fin_b = node.attrs['x']-long_a
-
-                        print inicio_a
-                        print fin_a
-                        print inicio_b
-                        print fin_b
         
                         node.attrs['x1'] = node.first_sibling().attrs['x']
-                        #print long_a
-                        #print long_b
+
                         # centrar B
                         if (long_a > long_b):
                             node.attrs['x2'] = fin_a
@@ -163,7 +158,7 @@ class ASTProcessor:
                         
                         if (index+1<len(ns)):    
                             ns[index+1].attrs['x'] = node.attrs['x2']
-                            ns[index+1].attrs['y'] = node.attrs['y2'] 
+                            ns[index+1].attrs['y'] = node.first_sibling().attrs['y']
                             ns[index+1].attrs['z'] = node.attrs['z'] 
 
                 ## caso LLAVES.
@@ -208,12 +203,13 @@ class ASTProcessor:
                         node.first_sibling().attrs['y2'] = h_l_attrs['y'][1]
                         node.attrs['y1'] = h_l_attrs['y'][0]
                         node.attrs['y2'] = h_l_attrs['y'][1]
+                        y_paren = (float(node.attrs['y2'])-float(node.attrs['y1']))*0.3
                         if (index+1<len(ns)):
-                            ns[index+1].attrs['x'] = node.attrs['x']
+                            ns[index+1].attrs['x'] = node.attrs['x'] +0.6*node.attrs['z']
                             if ((node.parent.parent == None or node.parent.parent.type == 'p' or node.parent.parent.type == 'u') and node.parent.left_sibling!=None):
-                                ns[index+1].attrs['y'] = node.parent.left_sibling.attrs['y']
+                                ns[index+1].attrs['y'] = y_paren
                                 ns[index+1].attrs['z'] = node.parent.left_sibling.attrs['z']
                             else:
-                                ns[index+1].attrs['y'] = node.attrs['y']
+                                ns[index+1].attrs['y'] = y_paren
                                 ns[index+1].attrs['z'] = node.attrs['z']
             index += 1

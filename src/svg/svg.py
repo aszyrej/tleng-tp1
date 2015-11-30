@@ -8,7 +8,7 @@ class SVG:
         root.set('xmlns', 'http://www.w3.org/2000/svg')
         root.set('version', '1.1')
         child = SubElement(root, 'g')
-        child.set('transform', 'translate(0,200) scale(200)')
+        child.set('transform', 'translate(0,300) scale(200)')
         child.set('font-family', 'Courier')
         self.tree = ET.ElementTree(root)
         self.gElement = child
@@ -40,38 +40,27 @@ class SVG:
 
 class SVGBuilder:
 
+    '''
+    Clase encargada de armar el XML para el SVG a partir de un AST.
+    '''
+
     def build(self, tree):
         svg = SVG()
         ns = tree.preorder_traversal()
         for node in ns:
-            if node.type == 'concat':
-                pass
-            elif node.type == 'divide':
-                pass
-            elif node.type == 'p':
-                pass
-            elif node.type == 'u':
-                pass
-            elif node.type == 'pu':
-                pass
-            elif node.type == '<>':
-                pass
-            elif node.type == '{}':
-                pass
-            else:
-                if (node.type == 'barra'):
-                    svg.appendLine(str(node.attrs['x1']), str(node.attrs['y1']), str(node.attrs['x2']), str(node.attrs['y2']))
-                elif (node.type == '(' or node.type == ')'):
-                    largo_paren = float(node.attrs['y2'])-float(node.attrs['y1'])+float(node.attrs['z'])
-                    y = largo_paren-float(node.attrs['z'])
-                    
-                    if node.type == '(':
-                        svg.appendText('(', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y - 0.4*y), str(node.attrs['z']), str(largo_paren))
-                    else:
-                        svg.appendText(')', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y - 0.4*y), str(node.attrs['z']), str(largo_paren))
-                elif (node.type != 'brackets' and node.type != 'parens' and node.type != '{' and node.type != '}'):
-                    svg.appendText(node.type, str(node.attrs['x']), str(node.attrs['y']), str(node.attrs['z']))
-
+            if (node.type == 'barra'):
+                svg.appendLine(str(node.attrs['x1']), str(node.attrs['y1']), str(node.attrs['x2']), str(node.attrs['y2']))
+            elif (node.type == '(' or node.type == ')'):
+                largo_paren = float(node.attrs['y2'])-float(node.attrs['y1'])+float(node.attrs['z'])
+                y = largo_paren-float(node.attrs['z'])
+                if node.type == '(':
+                    svg.appendText('(', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y - 0.4*y), str(node.attrs['z']), str(largo_paren))
+                else:
+                    svg.appendText(')', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y - 0.4*y), str(node.attrs['z']), str(largo_paren))
+            elif (node.type != 'brackets' and node.type != 'parens' and node.type != '{' and node.type != '}' \
+                and node.type != 'concat' and node.type != 'divide' and node.type != 'p' and node.type != 'u' \
+                and node.type != 'pu'):
+                svg.appendText(node.type, str(node.attrs['x']), str(node.attrs['y']), str(node.attrs['z']))
         return svg
 
         

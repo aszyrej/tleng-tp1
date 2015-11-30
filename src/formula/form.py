@@ -43,19 +43,18 @@ class Parser:
                   debugfile=self.debugfile,
                   tabmodule=self.tabmodule)
 
-    def run(self):
-        while 1:
-            try:
-                s = raw_input('form > ')
-            except EOFError:
-                break
-            if not s: continue
-            ast = Tree(yacc.parse(s))
-            ast_processor = ASTProcessor()
-            ast_processor.process(ast)
-            svgB = SVGBuilder()
-            svg = svgB.build(ast)
-            svg.save('test.svg')
+    def parse(self, exp):
+        ast = Tree(yacc.parse(exp))
+        return ast
+
+    def run(self, exp):
+        ast = Tree(yacc.parse(exp))
+        ast_processor = ASTProcessor()
+        ast_processor.process(ast)
+        svgB = SVGBuilder()
+        svg = svgB.build(ast)
+        svg.save('form.svg')
+        print "'form.svg' generado exitosamente"
 
 class Form(Parser):
 
@@ -76,10 +75,6 @@ class Form(Parser):
     t_CHAR  = r'[a-zA-Z+-]'
 
     t_ignore = " \t"
-
-    def t_newline(self, t):
-        r'\n+'
-        t.lexer.lineno += t.value.count("\n")
     
     def t_error(self, t):
         print("Illegal character '%s'" % t.value[0])
@@ -187,13 +182,10 @@ class Form(Parser):
         pass
 
     def p_error(self,p):
-        if p:
-            print("Syntax error at '%s'" % p.value)
-        else:
-            print("Syntax error at EOF")
+        raise Exception("Syntax error at '%s'" % p.value)
 
 if __name__ == '__main__':
     form = Form()
-    form.run()
+    form.run(sys.argv[1])
 
   
