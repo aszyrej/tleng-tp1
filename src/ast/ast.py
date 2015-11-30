@@ -177,8 +177,12 @@ class ASTProcessor:
                         if (index+1<len(ns)):
                             if ns[index+1].type!='brackets' or node.parent.parent==None or (node.parent.parent.type != 'p' and node.parent.parent.type != 'u' and node.parent.parent.type != 'pu'):
                                 ns[index+1].attrs['x'] = node.attrs['x']
-                                ns[index+1].attrs['y'] = node.attrs['y']
-                                ns[index+1].attrs['z'] = node.attrs['z']
+                                if node.parent.left_sibling!=None: 
+                                    ns[index+1].attrs['y'] = node.parent.left_sibling.attrs['y']
+                                    ns[index+1].attrs['z'] = node.parent.left_sibling.attrs['z']
+                                else:
+                                    ns[index+1].attrs['y'] = node.attrs['y']
+                                    ns[index+1].attrs['z'] = node.attrs['z']
 
                 ## caso PARENTESIS
                 elif node.parent.type == 'parens':
@@ -207,5 +211,8 @@ class ASTProcessor:
                                 if ns[index+1].type!='parens' or node.parent.parent==None or (node.parent.parent.type != 'p' and node.parent.parent.type != 'u' and node.parent.parent.type != 'pu'):
                                     ns[index+1].attrs['x'] = node.attrs['x']+0.6*node.attrs['z']
                                     ns[index+1].attrs['y'] = y_paren
-                                    ns[index+1].attrs['z'] = node.attrs['z']
+                                    if node.parent.left_sibling!=None:
+                                        ns[index+1].attrs['z'] = node.parent.left_sibling.attrs['z']
+                                    else:
+                                        ns[index+1].attrs['z'] = node.attrs['z']
             index += 1
