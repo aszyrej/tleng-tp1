@@ -203,6 +203,7 @@ class ASTProcessor:
                         node.first_sibling().attrs['y2'] = h_l_attrs['y'][1]
                         node.attrs['y1'] = h_l_attrs['y'][0]
                         node.attrs['y2'] = h_l_attrs['y'][1]
+                        node.attrs['y'] = node.first_sibling().attrs['y']
                         y_paren = (float(node.attrs['y2'])-float(node.attrs['y1']))*0.3
                         if (index+1<len(ns)):
                             ns[index+1].attrs['x'] = node.attrs['x'] +0.6*node.attrs['z']

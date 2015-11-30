@@ -54,9 +54,9 @@ class SVGBuilder:
                 largo_paren = float(node.attrs['y2'])-float(node.attrs['y1'])+float(node.attrs['z'])
                 y = largo_paren-float(node.attrs['z'])
                 if node.type == '(':
-                    svg.appendText('(', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y - 0.4*y), str(node.attrs['z']), str(largo_paren))
+                    svg.appendText('(', '0', str(node.attrs['y']), str(node.attrs['z']), str(node.attrs['x']), str(y - 0.4*y), str(node.attrs['z']), str(largo_paren))
                 else:
-                    svg.appendText(')', '0', '0', str(node.attrs['z']), str(node.attrs['x']), str(y - 0.4*y), str(node.attrs['z']), str(largo_paren))
+                    svg.appendText(')', '0', str(node.attrs['y']), str(node.attrs['z']), str(node.attrs['x']), str(y - 0.4*y), str(node.attrs['z']), str(largo_paren))
             elif (node.type != 'brackets' and node.type != 'parens' and node.type != '{' and node.type != '}' \
                 and node.type != 'concat' and node.type != 'divide' and node.type != 'p' and node.type != 'u' \
                 and node.type != 'pu'):
