@@ -48,14 +48,16 @@ class Parser:
         return ast
 
     def run(self, exp):
-        ast = Tree(yacc.parse(exp))
-        ast_processor = ASTProcessor()
-        ast_processor.process(ast)
-        svgB = SVGBuilder()
-        svg = svgB.build(ast)
-        svg.save('form.svg')
-        print "'form.svg' generado exitosamente"
-
+        try:
+            ast = Tree(yacc.parse(exp))
+            ast_processor = ASTProcessor()
+            ast_processor.process(ast)
+            svgB = SVGBuilder()
+            svg = svgB.build(ast)
+            svg.save('form.svg')
+            print "'form.svg' generado exitosamente"
+        except Exception as e:
+            print "Ocurrio un error al procesar la formula ingresada. " + str(e)
 class Form(Parser):
 
     tokens = (
@@ -77,8 +79,8 @@ class Form(Parser):
     t_ignore = " \t"
     
     def t_error(self, t):
-        print("Illegal character '%s'" % t.value[0])
-        t.lexer.skip(1)
+        raise Exception("Caracter ilegal '%s'" % t.value[0])
+        #t.lexer.skip(1)
 
     def p_expr_E(self,p):
         """
@@ -182,7 +184,7 @@ class Form(Parser):
         pass
 
     def p_error(self,p):
-        raise Exception("Syntax error at '%s'" % p.value)
+        raise Exception("Error de sintaxis")
 
 if __name__ == '__main__':
     form = Form()

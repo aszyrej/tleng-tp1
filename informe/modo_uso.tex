@@ -1,9 +1,13 @@
+
 \begin{section}{Modo de uso}
 
 Para invocar el programa debe irse al directorio \textit{/tleng-tp1/src/formula}. Una vez allí debe ejecutarse el archivo \textit{form.py} escribiendo
-\textit{python form.py}. Se generará un SVG con el nombre \textit{form.svg} en el mismo directorio.
+\textit{python form.py "formula"} (fórmula deseada entre comillas). Se generará un SVG con el nombre \textit{form.svg} en el mismo directorio.
+Por ejemplo: \textit{python form.py} "VIENTO\{FUERTE\}/VELERO\_\{PROBLEMAS\}"
 
-Para correr los tests, ir al directorio \textit{/tleng-tp1/tests} y escribir \textit{python test.py -v}. El obetivo de estos tests fue verificar
-que los AST (Abstract Syntax Trees) fueran generados correctamente a partir de una expresión.
+Para correr los tests, ir al directorio \textit{/tleng-tp1/src/tests} y escribir \textit{python test.py -v}. El obetivo de estos tests es verificar
+que los AST (Abstract Syntax Trees) sean generados correctamente a partir de una expresión.
+
+El programa fue testeado en Linux usando la versión 2.7.6 de Python.
 
 \end{section}
