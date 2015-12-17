@@ -5,8 +5,11 @@ Para invocar el programa debe irse al directorio \textit{/tleng-tp1/src/formula}
 \textit{python form.py "formula"} (fórmula deseada entre comillas). Se generará un SVG con el nombre \textit{form.svg} en el mismo directorio.
 Por ejemplo: \textit{python form.py} "VIENTO\{FUERTE\}/VELERO\_\{PROBLEMAS\}"
 
-Para correr los tests, ir al directorio \textit{/tleng-tp1/src/tests} y escribir \textit{python test.py -v}. El obetivo de estos tests es verificar
-que los AST (Abstract Syntax Trees) sean generados correctamente a partir de una expresión.
+Tenemos dos baterías de tests:
+
+Para correr la primera, dirigirse a \textit{/tleng-tp1/src/tests} y escribir \textit{python testParser.py -v}. Estos tests verifican que los AST (Abstract Syntax Trees) sean generados correctamente a partir de una expresión.
+
+Para correr la segunda, que se encuentra en el mismo directorio que la primera, escribir \textit{python testSVG.py -v}. Estos tests chequean que los los SVG de los casos mostrados en la sección Resultados, sean generados correctamente por el programa. Para ello, corre el programa tomando como input cada una de las expresiones y, posteriormente, compara las imágenes generadas con las imágenes que se encuentran en \textit{/tleng-tp1/src/tests/imgs}, esperando que sean las mismas.
 
 El programa fue testeado en Linux usando la versión 2.7.6 de Python.
 
